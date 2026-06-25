@@ -1,0 +1,58 @@
+# JUCE / C++ build artifacts
+Builds/
+Builds/**/build/
+Builds/**/bin/
+Builds/**/obj/
+Builds/**/x64/
+Builds/**/x86/
+Builds/**/DerivedData/
+Builds/**/cmake-build-*/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vcxproj.user
+*.VC.db
+*.VC.VC.opendb
+*.opensdf
+*.sdf
+*.cache
+*.ipch
+*.aps
+*.ncb
+*.pdb
+*.ilk
+*.exp
+*.lib
+
+# Xcode
+*.xcworkspace/
+*.xcodeproj/
+DerivedData/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+xcuserdata/
+
+# CLion / JetBrains
+.idea/
+*.iml
+
+# CMake / Make
+CMakeFiles/
+cmake_install.cmake
+CMakeCache.txt
+Makefile
+makefile
+
+# macOS / Linux / Windows noise
+.DS_Store
+Thumbs.db
+*.log
+
+# JUCE generated code
+JuceLibraryCode/
