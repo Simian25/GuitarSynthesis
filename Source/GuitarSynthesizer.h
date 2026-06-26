@@ -51,11 +51,12 @@ public:
     void noteOff();
     void process(const juce::dsp::ProcessContextReplacing<float>& context) override;
     void reset() override;
-    bool isProcessing() const { return isprocessing; }
+    int  currentNote() const { return midiNote; }
     bool isActive() const { return active; }
 
 
 private:
+    int  midiNote = -1;
     juce::Random           random;
     juce::dsp::Gain<float> gain;
     juce::dsp::DelayLine<float> delayLine;

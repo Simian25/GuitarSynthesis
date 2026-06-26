@@ -99,7 +99,12 @@ void GuitarSynthesisAudioProcessor::prepareToPlay (double sampleRate, int sample
     spec.sampleRate = sampleRate;
     spec.maximumBlockSize = static_cast<juce::uint32> (samplesPerBlock);
     spec.numChannels = static_cast<juce::uint32> (getTotalNumOutputChannels());
-    guitarSynth.prepare(spec);
+	for (auto& synth : guitarSynthArray) {
+		synth.prepare(spec);
+	}
+    limiter.prepare(spec);
+    limiter.setThreshold(-2.0f); // dBFS
+    limiter.setRelease(100.0f); // ms
 }
 
 void GuitarSynthesisAudioProcessor::releaseResources()
@@ -148,12 +153,45 @@ void GuitarSynthesisAudioProcessor::processBlock (juce::AudioBuffer<float>& buff
     for (const auto metadata : midiMessages)
     {
         auto msg = metadata.getMessage();
-        if (msg.isNoteOn())  guitarSynth.noteOn(msg.getNoteNumber(), msg.getFloatVelocity());
-        else if (msg.isNoteOff()) guitarSynth.noteOff();
+        if (msg.isNoteOn())
+        {
+            for (auto& guitar : guitarSynthArray)
+            {
+                if (!guitar.isActive())
+                {
+                    guitar.noteOn(msg.getNoteNumber(), msg.getFloatVelocity());
+                    break;
+                }
+            }
+        }
+        else if (msg.isNoteOff())
+        {
+            for (auto& guitar : guitarSynthArray)
+                if (guitar.currentNote() == msg.getNoteNumber())
+                    guitar.noteOff();
+        }
     }
+    // mix all voices into the buffer
+    juce::AudioBuffer<float> voiceBuffer(buffer.getNumChannels(),
+        buffer.getNumSamples());
+    for (auto& guitar : guitarSynthArray)
+    {
+        if (!guitar.isActive()) continue;
+
+        voiceBuffer.clear();
+        juce::dsp::AudioBlock<float>              block(voiceBuffer);
+        juce::dsp::ProcessContextReplacing<float> context(block);
+        guitar.process(context);
+
+        for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+            buffer.addFrom(channel, 0, voiceBuffer, channel, 0,
+                buffer.getNumSamples());
+
+    }
+    // apply limiter to the final mix
     juce::dsp::AudioBlock<float>              block(buffer);
     juce::dsp::ProcessContextReplacing<float> context(block);
-    guitarSynth.process(context);
+    limiter.process(context);
 }
     
 
