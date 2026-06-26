@@ -13,12 +13,13 @@ void GuitarSynthesizer::prepare(const juce::dsp::ProcessSpec& spec)
 
 void GuitarSynthesizer::noteOn(int midiNote, float velocity)
 {   
+    this->midiNote = midiNote;
     if (!isprocessing){
-        numberOfWhiteNoiseSamples = (sampleRate / juce::MidiMessage::getMidiNoteInHertz(midiNote));
-        delayLine.setDelay(numberOfWhiteNoiseSamples);
+        numberOfWhiteNoiseSamples = (sampleRate / juce::MidiMessage::getMidiNoteInHertz(midiNote))-0.5;
+		delayLine.setDelay(numberOfWhiteNoiseSamples);
         gain.setGainLinear(velocity * 0.8f);
         whitenoise.reset();
-        whitenoise.setMaxSamples(numberOfWhiteNoiseSamples);
+        whitenoise.setMaxSamples(std::ceil(numberOfWhiteNoiseSamples));
         active = true;
     }
     else {
@@ -34,6 +35,8 @@ void GuitarSynthesizer::noteOff()
     active = false;
     delayLine.reset();
     lpFilter.reset();
+    this->midiNote = -1;
+
 }
 void GuitarSynthesizer::reset() {
     gain.reset();

@@ -57,7 +57,10 @@ public:
     juce::MidiKeyboardState keyboardState;
 private:
     juce::dsp::ProcessSpec spec;
-    GuitarSynthesizer guitarSynth;
+    juce::dsp::Limiter<float> limiter;
+
+    static constexpr int numVoices = 4;
+    std::array<GuitarSynthesizer, numVoices> guitarSynthArray;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GuitarSynthesisAudioProcessor)
 };
